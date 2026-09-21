@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Action Sequence Composer</title>
+<style>
+  :root { --bg:#1e2228; --panel:#262b33; --panel2:#2f353f; --fg:#e8eaed; --muted:#9aa0a6;
+          --accent:#4c8bf5; --border:#3a414b; --danger:#e05555; --ok:#4caf70; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+         background:var(--bg); color:var(--fg); font-size:14px; }
+  header { display:flex; align-items:center; gap:12px; padding:10px 14px;
+           border-bottom:1px solid var(--border); background:var(--panel); flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  .spacer { flex:1; }
+  button { background:var(--panel2); color:var(--fg); border:1px solid var(--border);
+           border-radius:6px; padding:6px 12px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  input[type=text], input[type=number] { background:var(--panel2); color:var(--fg);
+           border:1px solid var(--border); border-radius:6px; padding:5px 8px; }
+  .layout { display:flex; gap:14px; padding:12px 14px; align-items:flex-start; }
+  .left { width:340px; flex:0 0 340px; display:flex; flex-direction:column; gap:10px; }
+  .right { flex:1; display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 12px; }
+  .card h2 { font-size:13px; margin:0 0 8px; color:var(--muted); font-weight:600; }
+  .row { display:flex; align-items:center; gap:8px; margin:5px 0; flex-wrap:wrap; }
+  .row label { min-width:56px; color:var(--muted); }
+  .muted { color:var(--muted); font-size:12px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .param { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .param label { color:var(--muted); font-size:12px; }
+  .param input { width:76px; }
+  .preview { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pv { position:relative; background:#000; border:1px solid var(--border); border-radius:8px;
+        overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .pv.full { grid-column:1 / -1; }
+  .pv canvas { display:block; max-width:100%; height:auto; }
+  .pv .tag { position:absolute; top:6px; left:8px; font-size:11px; color:#fff;
+             background:rgba(0,0,0,.55); padding:2px 8px; border-radius:4px; }
+  .listbox { width:100%; height:150px; background:var(--panel2); color:var(--fg);
+             border:1px solid var(--border); border-radius:6px; overflow:auto; }
+  .listbox div { padding:4px 8px; cursor:pointer; border-bottom:1px solid #2b313a; }
+  .listbox div.selected { background:var(--accent); color:#fff; }
+  .btnrow { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .btnrow button { padding:5px 10px; font-size:13px; }
+  #progress { width:100%; height:8px; }
+  #status { font-size:13px; min-height:18px; }
+  #info { font-size:12px; color:var(--muted); }
+  .lang { display:flex; gap:4px; }
+  .lang button { padding:4px 10px; font-size:12px; }
+  .lang button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 data-i18n="title">Action Sequence Composer</h1>
+  <button id="openBtn" data-i18n="openVideo">Open Video...</button>
+  <input type="file" id="fileInput" accept="video/*" hidden>
+  <span id="info" class="muted"></span>
+  <div class="spacer"></div>
+  <div class="lang">
+    <button id="langZh" class="on">中文</button>
+    <button id="langEn">English</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- 左侧控制区 -->
+  <div class="left">
+    <div class="card">
+      <h2 data-i18n="modeGroup">Frame selection mode</h2>
+      <div class="row">
+        <label><input type="radio" name="mode" value="fixed" checked> <span data-i18n="modeFixed">Fixed interval</span></label>
+        <label><input type="radio" name="mode" value="manual"> <span data-i18n="modeManual">Manual selection</span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="rangeGroup">Time range (seconds)</h2>
+      <div class="grid2">
+        <div class="param"><label data-i18n="start">Start</label><input type="number" id="startSec" value="0" step="0.1"></div>
+        <div class="param"><label data-i18n="end">End</label><input type="number" id="endSec" value="" step="0.1" placeholder="end"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="intervalGroup">Fixed interval</h2>
+      <div class="row">
+        <label data-i18n="interval">Interval</label>
+        <input type="number" id="intervalVal" value="30" step="1" style="width:80px">
+        <label><input type="radio" name="iunit" value="frame" checked> <span data-i18n="unitFrame">frames</span></label>
+        <label><input type="radio" name="iunit" value="second"> <span data-i18n="unitSecond">seconds</span></label>
+      </div>
+      <div id="intervalHint" class="muted"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="algoGroup">Algorithm parameters</h2>
+      <div class="param"><label data-i18n="pFps">FPS (for time)</label><input type="number" id="fps" value="30" step="0.001"></div>
+      <div class="param"><label data-i18n="pHistory">MOG2 history</label><input type="number" id="history" value="100" step="1"></div>
+      <div class="param"><label data-i18n="pVarth">MOG2 varThreshold</label><input type="number" id="varThreshold" value="40" step="1"></div>
+      <div class="param"><label data-i18n="pKernel">Kernel size</label><input type="number" id="kernel" value="10" step="2"></div>
+      <div class="param"><label data-i18n="pArea">Contour area</label><input type="number" id="area" value="200" step="10"></div>
+      <div class="param"><label data-i18n="pEps">Epsilon</label><input type="number" id="epsilon" value="0.01" step="0.005"></div>
+      <div class="param"><label data-i18n="pBgSamples">BG samples</label><input type="number" id="bgSamples" value="15" step="1"></div>
+      <div class="param"><label data-i18n="pSeed">Seed (0=random)</label><input type="number" id="seed" value="42" step="1"></div>
+      <div class="btnrow"><button id="resetBtn" data-i18n="resetParams">Reset</button></div>
+    </div>
+
+    <div class="card">
+      <div class="btnrow">
+        <button id="generateBtn" class="primary" data-i18n="generate">Generate composite</button>
+        <button id="cancelBtn" data-i18n="cancel" disabled>Cancel</button>
+        <button id="downloadBtn" data-i18n="download" disabled>Download PNG</button>
+      </div>
+      <progress id="progress" max="1" value="0"></progress>
+      <div id="status" class="muted" data-i18n="ready">Ready</div>
+    </div>
+  </div>
+
+  <!-- 右侧预览区 -->
+  <div class="right">
+    <div class="card">
+      <div class="preview">
+        <div class="pv full"><span class="tag" data-i18n="mainPanel">Video / Composite</span><canvas id="mainCanvas" width="720" height="400"></canvas></div>
+        <div class="pv"><span class="tag" data-i18n="framePanel">Current frame</span><canvas id="frameCanvas" width="340" height="200"></canvas></div>
+        <div class="pv"><span class="tag" data-i18n="maskPanel">Foreground mask</span><canvas id="maskCanvas" width="340" height="200"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="ctrlGroup">Browse / Play</h2>
+      <input type="range" id="scrubber" min="1" max="1" value="1" style="width:100%">
+      <div class="btnrow">
+        <button id="firstBtn">|◀</button>
+        <button id="back10Btn">◀◀</button>
+        <button id="back1Btn">◀</button>
+        <button id="playBtn" data-i18n="play">▶ Play</button>
+        <button id="fwd1Btn">▶</button>
+        <button id="fwd10Btn">▶▶</button>
+        <button id="lastBtn">▶|</button>
+        <span id="framePos" class="muted"></span>
+      </div>
+    </div>
+
+    <div class="card" style="flex:1">
+      <h2 data-i18n="listGroup">Selected frames (1-based)</h2>
+      <div class="listbox" id="frameList"></div>
+      <div class="btnrow">
+        <button id="addBtn" data-i18n="addCurrent">Add current</button>
+        <button id="insertBtn" data-i18n="insertCurrent">Insert before selected</button>
+        <button id="delBtn" data-i18n="deleteSelected">Delete selected</button>
+        <button id="upBtn" data-i18n="moveUp">Up</button>
+        <button id="downBtn" data-i18n="moveDown">Down</button>
+        <button id="clearBtn" data-i18n="clearList">Clear</button>
+        <button id="autofillBtn" data-i18n="autoFill">Auto-fill</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="opencv.js"></script>
+<script src="compose_core.js"></script>
+<script>
+"use strict";
+
+// ============================ 文案 ============================
+const I18N = {
+  title: { zh: "行动序列合成图生成器", en: "Action Sequence Composer" },
+  openVideo: { zh: "选择视频...", en: "Open Video..." },
+  modeGroup: { zh: "取帧模式", en: "Frame selection mode" },
+  modeFixed: { zh: "固定间隔", en: "Fixed interval" },
+  modeManual: { zh: "手动选帧", en: "Manual selection" },
+  rangeGroup: { zh: "作图时间区间（秒）", en: "Time range (seconds)" },
+  start: { zh: "起始", en: "Start" },
+  end: { zh: "结束（留空=末尾）", en: "End (blank = end)" },
+  intervalGroup: { zh: "固定间隔", en: "Fixed interval" },
+  interval: { zh: "间隔", en: "Interval" },
+  unitFrame: { zh: "帧", en: "frames" },
+  unitSecond: { zh: "秒", en: "seconds" },
+  algoGroup: { zh: "算法参数", en: "Algorithm parameters" },
+  pFps: { zh: "帧率（换算时间用）", en: "FPS (for time)" },
+  pHistory: { zh: "MOG2 history（背景历史帧数）", en: "MOG2 history" },
+  pVarth: { zh: "MOG2 varThreshold（灵敏度）", en: "MOG2 varThreshold" },
+  pKernel: { zh: "形态学核大小（闭运算）", en: "Kernel size (closing)" },
+  pArea: { zh: "轮廓面积阈值（滤噪）", en: "Contour area (denoise)" },
+  pEps: { zh: "多边形近似 epsilon", en: "Polygon approx. epsilon" },
+  pBgSamples: { zh: "背景采样帧数", en: "BG samples" },
+  pSeed: { zh: "随机种子（0=随机）", en: "Seed (0=random)" },
+  resetParams: { zh: "恢复默认", en: "Reset" },
+  generate: { zh: "生成合成图", en: "Generate composite" },
+  cancel: { zh: "取消", en: "Cancel" },
+  download: { zh: "下载 PNG", en: "Download PNG" },
+  ready: { zh: "就绪", en: "Ready" },
+  mainPanel: { zh: "视频预览 / 合成结果", en: "Video / Composite" },
+  framePanel: { zh: "当前帧", en: "Current frame" },
+  maskPanel: { zh: "前景遮罩", en: "Foreground mask" },
+  ctrlGroup: { zh: "浏览 / 播放", en: "Browse / Play" },
+  play: { zh: "▶ 播放", en: "▶ Play" },
+  pause: { zh: "⏸ 暂停", en: "⏸ Pause" },
+  listGroup: { zh: "手动选帧列表（1 起始）", en: "Selected frames (1-based)" },
+  addCurrent: { zh: "添加当前帧", en: "Add current" },
+  insertCurrent: { zh: "插入到选中前", en: "Insert before selected" },
+  deleteSelected: { zh: "删除选中", en: "Delete selected" },
+  moveUp: { zh: "上移", en: "Up" },
+  moveDown: { zh: "下移", en: "Down" },
+  clearList: { zh: "清空列表", en: "Clear" },
+  autoFill: { zh: "按间隔自动填充", en: "Auto-fill" },
+  framePos: { zh: "帧 %d / %d  (%.2f s)", en: "Frame %d / %d  (%.2f s)" },
+  noVideo: { zh: "未选择视频", en: "No video selected" },
+  loaded: { zh: "已加载视频，可开始取帧", en: "Video loaded. Ready to select frames." },
+  needVideo: { zh: "请先选择视频", en: "Please open a video first." },
+  needFrame: { zh: "请先加载视频并浏览到目标帧", en: "Please load a video and navigate to a frame first." },
+  filledN: { zh: "已按间隔填充 %d 帧", en: "Auto-filled %d frames" },
+  noTargets: { zh: "没有可用的目标帧。固定间隔：检查时间区间与间隔；手动选帧：先在列表添加帧。",
+               en: "No target frames. Fixed interval: check time range/interval; Manual: add frames first." },
+  estimating: { zh: "正在估算背景（采样中值）...", en: "Estimating background (median of samples)..." },
+  generating: { zh: "生成中...", en: "Generating..." },
+  processing: { zh: "处理帧 %d / %d", en: "Processing frame %d / %d" },
+  doneFrames: { zh: "完成，共合成 %d 帧", en: "Done, %d frames composited" },
+  cancelled: { zh: "已取消", en: "Cancelled" },
+  doneSaved: { zh: "合成完成，点击“下载 PNG”保存", en: "Done. Click \"Download PNG\" to save." },
+  intervalHintSec: { zh: "≈ 每 %g 秒 = %d 帧（@ %.3f fps）", en: "≈ every %g s = %d frames (@ %.3f fps)" },
+  intervalHintFrame: { zh: "≈ 每 %d 帧 = %.2f 秒（@ %.3f fps）", en: "≈ every %d frames = %.2f s (@ %.3f fps)" },
+};
+
+const state = {
+  lang: "zh",
+  video: null,
+  videoUrl: null,
+  fps: 30,
+  duration: 0,
+  frameCount: 0,
+  srcW: 0,
+  srcH: 0,
+  currentIdx: 0,
+  playing: false,
+  selectedFrames: [],   // 0-based
+  listSelection: -1,    // 列表选中项（在 selectedFrames 中的下标）
+  generating: false,
+  cancelled: false,
+  result: null,         // Uint8ClampedArray RGBA
+};
+
+const $ = (id) => document.getElementById(id);
+const video = document.createElement("video");
+video.muted = true;
+video.playsInline = true;
+video.preload = "auto";
+// 挂到 DOM 但移到屏幕外（不要用 display:none，否则部分浏览器 canvas 抓帧会黑屏）
+video.style.cssText = "position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0.01;pointer-events:none;";
+document.body.appendChild(video);
+
+const capCanvas = document.createElement("canvas");
+const capCtx = capCanvas.getContext("2d", { willReadFrequently: true });
+const tmpCanvas = document.createElement("canvas");
+const tmpCtx = tmpCanvas.getContext("2d");
+
+// OpenCV.js 异步初始化
+let cvReady = false;
+if (typeof cv !== "undefined") {
+  if (cv.onRuntimeInitialized) cv.onRuntimeInitialized = () => { cvReady = true; };
+  if (cv.Mat) cvReady = true;
+}
+async function waitForCv() {
+  while (!cvReady) {
+    if (typeof cv !== "undefined" && cv.Mat) { cvReady = true; break; }
+    await sleep(100);
+  }
+}
+
+function t(key) { const e = I18N[key]; return e ? e[state.lang] : key; }
+function fmt(s, ...args) {
+  let i = 0;
+  return s.replace(/%([-+0-9]*)(?:\.(\d+))?([dfgs])/g, (m, flags, prec, conv) => {
+    const v = args[i++];
+    if (conv === "d") return String(Math.round(v));
+    if (conv === "f" && prec !== undefined) return Number(v).toFixed(parseInt(prec, 10));
+    return String(v);
+  });
+}
+
+// ============================ 显示辅助 ============================
+function drawVideoTo(canvas) {
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (video.readyState >= 2) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+}
+
+function rgbaToCanvas(rgba, w, h, canvas) {
+  tmpCanvas.width = w; tmpCanvas.height = h;
+  const id = tmpCtx.createImageData(w, h);
+  id.data.set(rgba.subarray(0, w * h * 4));
+  tmpCtx.putImageData(id, 0, 0);
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(tmpCanvas, 0, 0, canvas.width, canvas.height);
+}
+
+function maskToCanvas(mask, w, h, canvas) {
+  tmpCanvas.width = w; tmpCanvas.height = h;
+  const id = tmpCtx.createImageData(w, h);
+  const d = id.data;
+  for (let p = 0; p < w * h; p++) {
+    const v = mask[p];
+    d[p * 4] = v; d[p * 4 + 1] = v; d[p * 4 + 2] = v; d[p * 4 + 3] = 255;
+  }
+  tmpCtx.putImageData(id, 0, 0);
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(tmpCanvas, 0, 0, canvas.width, canvas.height);
+}
+
+function captureFrameData() {
+  capCanvas.width = state.srcW; capCanvas.height = state.srcH;
+  capCtx.drawImage(video, 0, 0, state.srcW, state.srcH);
+  return capCtx.getImageData(0, 0, state.srcW, state.srcH);
+}
+
+function setStatus(msg, cls) {
+  const el = $("status");
+  el.textContent = msg;
+  el.style.color = cls === "ok" ? "#4caf70" : cls === "err" ? "#e05555" : "";
+}
+
+function setProgress(v) { $("progress").value = Math.max(0, Math.min(1, v)); }
+
+// ============================ 语言 ============================
+function applyTexts() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const k = el.getAttribute("data-i18n");
+    if (I18N[k]) el.textContent = I18N[k][state.lang];
+  });
+  $("endSec").placeholder = state.lang === "zh" ? "末尾" : "end";
+  $("langZh").classList.toggle("on", state.lang === "zh");
+  $("langEn").classList.toggle("on", state.lang === "en");
+  document.title = t("title");
+  refreshDynamicTexts();
+}
+function setLang(lang) {
+  state.lang = lang;
+  applyTexts();
+}
+function refreshDynamicTexts() {
+  updateFramePos();
+  updateIntervalHint();
+  refreshList();
+  $("playBtn").textContent = state.playing ? t("pause") : t("play");
+}
+
+// ============================ 视频加载 ============================
+function openVideo() { $("fileInput").click(); }
+
+function loadVideo(file) {
+  if (state.videoUrl) URL.revokeObjectURL(state.videoUrl);
+  state.videoUrl = URL.createObjectURL(file);
+  video.onloadedmetadata = async () => {
+    state.duration = video.duration || 0;
+    state.srcW = video.videoWidth;
+    state.srcH = video.videoHeight;
+    state.fps = parseFloat($("fps").value) || 30;
+    state.frameCount = Math.max(1, Math.round(state.duration * state.fps));
+    $("info").textContent = state.srcW + "×" + state.srcH + " | " +
+      state.fps.toFixed(2) + " fps | " + state.frameCount + " frames | " +
+      state.duration.toFixed(2) + "s";
+    $("scrubber").max = state.frameCount;
+    $("scrubber").value = 1;
+    await seekToFrame(0);
+    setStatus(t("loaded"));
+    refreshDynamicTexts();
+  };
+  video.onerror = () => setStatus(t("needVideo"), "err");
+  video.src = state.videoUrl;   // 最后再设 src，确保回调已绑定
+}
+
+// ============================ 帧浏览 ============================
+function seekToFrame(idx) {
+  return new Promise((resolve) => {
+    idx = Math.max(0, Math.min(state.frameCount - 1, Math.round(idx)));
+    const target = state.fps > 0 ? idx / state.fps : 0;
+    const t = Math.min(target, Math.max(0, state.duration - 0.001));
+    state.currentIdx = idx;
+    updateFramePos();
+    // 若已停在目标位置，直接返回（避免某些浏览器不触发 seeked 导致卡死）
+    if (Math.abs(video.currentTime - t) < 1e-3 && video.readyState >= 2) { resolve(); return; }
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      video.removeEventListener("seeked", finish);
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(finish, 2000);   // 兜底，防止卡死
+    video.addEventListener("seeked", finish);
+    video.currentTime = t;
+  });
+}
+
+async function showFrame(idx) {
+  if (!state.frameCount) return;
+  await seekToFrame(idx);
+  drawVideoTo($("mainCanvas"));
+  drawVideoTo($("frameCanvas"));
+  $("scrubber").value = state.currentIdx + 1;
+  updateFramePos();
+}
+
+function updateFramePos() {
+  const tsec = state.fps > 0 ? state.currentIdx / state.fps : 0;
+  $("framePos").textContent = fmt(t("framePos"), state.currentIdx + 1, state.frameCount, tsec);
+}
+
+async function stepTo(idx) { stopPlay(); await showFrame(idx); }
+async function stepBy(delta) { stopPlay(); await showFrame(state.currentIdx + delta); }
+
+let rafId = null;
+function playToggle() {
+  if (!state.frameCount) return;
+  if (state.playing) { stopPlay(); return; }
+  state.playing = true;
+  $("playBtn").textContent = t("pause");
+  video.play().then(() => {
+    if (!state.playing) return;
+    const loop = () => {
+      if (!state.playing) return;
+      state.currentIdx = Math.max(0, Math.min(state.frameCount - 1,
+        Math.round(video.currentTime * state.fps)));
+      drawVideoTo($("mainCanvas"));
+      drawVideoTo($("frameCanvas"));
+      $("scrubber").value = state.currentIdx + 1;
+      updateFramePos();
+      if (video.ended || video.currentTime >= state.duration - 0.001) { stopPlay(); return; }
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+  }).catch(() => { stopPlay(); setStatus(t("needVideo"), "err"); });
+}
+function stopPlay() {
+  state.playing = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  video.pause();
+  $("playBtn").textContent = t("play");
+}
+
+// ============================ 帧列表 ============================
+function refreshList() {
+  const box = $("frameList");
+  box.innerHTML = "";
+  state.selectedFrames.forEach((idx, i) => {
+    const div = document.createElement("div");
+    const tsec = state.fps > 0 ? idx / state.fps : 0;
+    div.textContent = fmt("  %5d    %.2f s", idx + 1, tsec);
+    if (i === state.listSelection) div.classList.add("selected");
+    div.onclick = () => { state.listSelection = i; refreshList(); };
+    box.appendChild(div);
+  });
+}
+function addCurrent() {
+  stopPlay();
+  if (!state.frameCount) { setStatus(t("needFrame"), "err"); return; }
+  if (!state.selectedFrames.includes(state.currentIdx)) {
+    state.selectedFrames.push(state.currentIdx);
+    state.selectedFrames.sort((a, b) => a - b);
+  }
+  refreshList();
+}
+function insertCurrent() {
+  stopPlay();
+  if (!state.frameCount) { setStatus(t("needFrame"), "err"); return; }
+  const pos = state.listSelection;
+  state.selectedFrames = state.selectedFrames.filter((x) => x !== state.currentIdx);
+  if (pos >= 0 && pos < state.selectedFrames.length) state.selectedFrames.splice(pos, 0, state.currentIdx);
+  else { state.selectedFrames.push(state.currentIdx); state.selectedFrames.sort((a, b) => a - b); }
+  refreshList();
+}
+function deleteSelected() {
+  if (state.listSelection >= 0) state.selectedFrames.splice(state.listSelection, 1);
+  state.listSelection = -1;
+  refreshList();
+}
+function moveSelected(delta) {
+  const i = state.listSelection;
+  const j = i + delta;
+  if (i >= 0 && j >= 0 && j < state.selectedFrames.length) {
+    const tmp = state.selectedFrames[i];
+    state.selectedFrames[i] = state.selectedFrames[j];
+    state.selectedFrames[j] = tmp;
+    state.listSelection = j;
+    refreshList();
+  }
+}
+function clearList() { state.selectedFrames = []; state.listSelection = -1; refreshList(); }
+
+function computeIntervalTargets() {
+  const fps = state.fps || 30;
+  const startSec = parseFloat($("startSec").value) || 0;
+  const endSecRaw = $("endSec").value.trim();
+  const endSec = endSecRaw === "" ? state.duration : (parseFloat(endSecRaw) || state.duration);
+  let startF = Math.max(0, Math.min(state.frameCount - 1, Math.round(startSec * fps)));
+  let endF = Math.max(startF, Math.min(state.frameCount - 1, Math.round(endSec * fps)));
+  const val = parseFloat($("intervalVal").value) || 30;
+  const unit = document.querySelector('input[name="iunit"]:checked').value;
+  const step = Math.max(1, Math.round(unit === "second" ? val * fps : val));
+  const targets = [];
+  for (let i = startF; i <= endF; i += step) targets.push(i);
+  if (!targets.length) targets.push(startF);
+  return targets;
+}
+function autoFill() {
+  if (!state.frameCount) { setStatus(t("needVideo"), "err"); return; }
+  state.selectedFrames = Array.from(new Set(computeIntervalTargets()));
+  state.listSelection = -1;
+  refreshList();
+  setStatus(fmt(t("filledN"), state.selectedFrames.length));
+}
+
+function updateIntervalHint() {
+  const val = parseFloat($("intervalVal").value) || 30;
+  const unit = document.querySelector('input[name="iunit"]:checked').value;
+  if (unit === "second") $("intervalHint").textContent = fmt(t("intervalHintSec"), val, Math.max(1, Math.round(val * state.fps)), state.fps);
+  else $("intervalHint").textContent = fmt(t("intervalHintFrame"), Math.max(1, Math.round(val)), Math.max(1, Math.round(val)) / state.fps, state.fps);
+}
+
+// ============================ 生成 ============================
+function collectTargets() {
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  if (mode === "fixed") return computeIntervalTargets();
+  return Array.from(new Set(state.selectedFrames)).sort((a, b) => a - b);
+}
+
+async function generate() {
+  if (typeof ComposeCore === "undefined" || typeof cv === "undefined") {
+    setStatus("错误：opencv.js / compose_core.js 未加载，请确认它们与本 html 在同一文件夹。", "err");
+    return;
+  }
+  if (state.generating || !state.frameCount) { setStatus(t("needVideo"), "err"); return; }
+  const targets = collectTargets();
+  if (!targets.length) { setStatus(t("noTargets"), "err"); return; }
+
+  // 与桌面 exe 完全一致的参数
+  const history = Math.max(1, parseInt($("history").value) || 100);
+  const varThreshold = parseFloat($("varThreshold").value) || 40;
+  let ksize = Math.max(1, parseInt($("kernel").value) || 10);
+  if (ksize % 2 === 0) ksize += 1;   // 核强制奇数
+  const areaThr = Math.max(0, parseFloat($("area").value) || 0);
+  const epsilon = Math.max(0, parseFloat($("epsilon").value) || 0);
+  const bgSamples = Math.max(1, Math.min(64, parseInt($("bgSamples").value) || 15));
+  const seed = Math.max(0, parseInt($("seed").value) || 0);
+
+  state.generating = true;
+  state.cancelled = false;
+  $("generateBtn").disabled = true;
+  $("cancelBtn").disabled = false;
+  $("downloadBtn").disabled = true;
+  setProgress(0);
+
+  let fgbg = null, kernel = null;
+  try {
+    setStatus(t("estimating"));
+    await waitForCv();
+    await sleep(30);
+
+    // 1) 背景估计：随机采样 N 帧求中值（与桌面一致）
+    const rng = mulberry32(seed === 0 ? (Date.now() & 0xffffffff) : seed);
+    const samples = [];
+    for (let k = 0; k < bgSamples; k++) {
+      if (state.cancelled) throw { cancelled: true };
+      const idx = Math.floor(rng() * state.frameCount);
+      await seekToFrame(idx);
+      const d = captureFrameData();
+      samples.push(new Uint8ClampedArray(d.data));
+    }
+    const bg = ComposeCore.medianBackground(samples, state.srcW, state.srcH);
+    const outputMat = cv.matFromImageData(new ImageData(bg, state.srcW, state.srcH));
+
+    // 2) MOG2 背景减除器（与桌面一致）
+    fgbg = new cv.BackgroundSubtractorMOG2(history, varThreshold, false);
+    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(ksize, ksize));
+    const fgmask = new cv.Mat(state.srcH, state.srcW, cv.CV_8UC1);
+    const frameBgr = new cv.Mat();   // 复用：RGBA -> BGR（MOG2 需要 3 通道）
+
+    const targetSet = new Set(targets);
+    const first = targets[0];
+    const last = targets[targets.length - 1];
+    const total = last - first + 1;
+    setStatus(t("generating"));
+
+    // 3) 从第一个目标帧开始逐帧训练 MOG2（与桌面一致），仅对目标帧合成
+    for (let idx = first; idx <= last; idx++) {
+      if (state.cancelled) throw { cancelled: true };
+      await seekToFrame(idx);
+      const d = captureFrameData();
+      const frameMat = cv.matFromImageData(d);
+      cv.cvtColor(frameMat, frameBgr, cv.COLOR_RGBA2BGR);
+      fgbg.apply(frameBgr, fgmask);   // 每一帧都训练背景模型
+
+      if (targetSet.has(idx)) {
+        // 形态学闭运算
+        const fgClosed = new cv.Mat();
+        cv.morphologyEx(fgmask, fgClosed, cv.MORPH_CLOSE, kernel);
+        // 找轮廓
+        const contours = new cv.MatVector();
+        const hierarchy = new cv.Mat();
+        cv.findContours(fgClosed, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+        // 面积过滤 + 多边形近似 → mask
+        const mask = cv.Mat.zeros(state.srcH, state.srcW, cv.CV_8UC1);
+        for (let c = 0; c < contours.size(); c++) {
+          const cnt = contours.get(c);
+          if (cv.contourArea(cnt) <= areaThr) continue;
+          const arclen = cv.arcLength(cnt, true);
+          if (arclen <= 0) continue;
+          const poly = new cv.Mat();
+          cv.approxPolyDP(cnt, poly, epsilon * arclen, true);
+          const vec = new cv.MatVector();
+          vec.push_back(poly);
+          cv.drawContours(mask, vec, -1, new cv.Scalar(255, 255, 255, 255), -1);
+          vec.delete(); poly.delete();
+        }
+        // 把前景像素叠加到合成图
+        frameMat.copyTo(outputMat, mask);
+        // 预览
+        const maskData = mask.data;
+        drawVideoTo($("frameCanvas"));
+        maskToCanvas(maskData, state.srcW, state.srcH, $("maskCanvas"));
+        rgbaToCanvas(outputMat.data, state.srcW, state.srcH, $("mainCanvas"));
+        setStatus(fmt(t("processing"), idx + 1, last + 1));
+
+        mask.delete(); contours.delete(); hierarchy.delete(); fgClosed.delete();
+      }
+      frameMat.delete();
+      setProgress((idx - first + 1) / Math.max(1, total));
+      await sleep(0);
+    }
+
+    state.result = new Uint8ClampedArray(outputMat.data);
+    fgmask.delete();
+    frameBgr.delete();
+    outputMat.delete();
+    setStatus(fmt(t("doneFrames"), targets.length), "ok");
+    $("downloadBtn").disabled = false;
+    rgbaToCanvas(state.result, state.srcW, state.srcH, $("mainCanvas"));
+  } catch (e) {
+    if (e && e.cancelled) setStatus(t("cancelled"));
+    else { console.error(e); setStatus(String(e && e.message ? e.message : e), "err"); }
+  } finally {
+    if (fgbg) fgbg.delete();
+    if (kernel) kernel.delete();
+    state.generating = false;
+    $("generateBtn").disabled = false;
+    $("cancelBtn").disabled = true;
+  }
+}
+
+function downloadPNG() {
+  if (!state.result) return;
+  const c = document.createElement("canvas");
+  c.width = state.srcW; c.height = state.srcH;
+  const ctx = c.getContext("2d");
+  const id = ctx.createImageData(state.srcW, state.srcH);
+  id.data.set(state.result);
+  ctx.putImageData(id, 0, 0);
+  const a = document.createElement("a");
+  a.href = c.toDataURL("image/png");
+  a.download = "composite.png";
+  a.click();
+}
+
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// ============================ 事件绑定 ============================
+$("openBtn").addEventListener("click", openVideo);
+$("fileInput").addEventListener("change", (e) => { if (e.target.files[0]) loadVideo(e.target.files[0]); });
+$("langZh").addEventListener("click", () => setLang("zh"));
+$("langEn").addEventListener("click", () => setLang("en"));
+
+$("firstBtn").addEventListener("click", () => stepTo(0));
+$("back10Btn").addEventListener("click", () => stepBy(-10));
+$("back1Btn").addEventListener("click", () => stepBy(-1));
+$("fwd1Btn").addEventListener("click", () => stepBy(1));
+$("fwd10Btn").addEventListener("click", () => stepBy(10));
+$("lastBtn").addEventListener("click", () => stepTo(state.frameCount - 1));
+$("playBtn").addEventListener("click", playToggle);
+
+$("scrubber").addEventListener("input", (e) => {
+  const idx = parseInt(e.target.value) - 1;
+  const tsec = state.fps > 0 ? idx / state.fps : 0;
+  $("framePos").textContent = fmt(t("framePos"), idx + 1, state.frameCount, tsec);
+});
+$("scrubber").addEventListener("change", (e) => { showFrame(parseInt(e.target.value) - 1); });
+
+$("addBtn").addEventListener("click", addCurrent);
+$("insertBtn").addEventListener("click", insertCurrent);
+$("delBtn").addEventListener("click", deleteSelected);
+$("upBtn").addEventListener("click", () => moveSelected(-1));
+$("downBtn").addEventListener("click", () => moveSelected(1));
+$("clearBtn").addEventListener("click", clearList);
+$("autofillBtn").addEventListener("click", autoFill);
+
+$("generateBtn").addEventListener("click", generate);
+$("cancelBtn").addEventListener("click", () => { state.cancelled = true; });
+$("downloadBtn").addEventListener("click", downloadPNG);
+$("resetBtn").addEventListener("click", () => {
+  $("history").value = 100;
+  $("varThreshold").value = 40;
+  $("kernel").value = 10;
+  $("area").value = 200;
+  $("epsilon").value = 0.01;
+  $("bgSamples").value = 15;
+  $("seed").value = 42;
+});
+
+document.querySelectorAll('input[name="mode"]').forEach((r) =>
+  r.addEventListener("change", () => refreshDynamicTexts()));
+document.querySelectorAll('input[name="iunit"]').forEach((r) =>
+  r.addEventListener("change", updateIntervalHint));
+$("intervalVal").addEventListener("input", updateIntervalHint);
+$("fps").addEventListener("change", (e) => {
+  state.fps = parseFloat(e.target.value) || 30;
+  state.frameCount = Math.max(1, Math.round(state.duration * state.fps));
+  $("scrubber").max = state.frameCount;
+  refreshDynamicTexts();
+});
+
+// 全局错误提示，方便定位问题
+window.addEventListener("error", (e) => {
+  setStatus("Error: " + (e.message || (e.error && e.error.message) || e.error), "err");
+});
+window.addEventListener("unhandledrejection", (e) => {
+  const r = e.reason;
+  setStatus("Error: " + (r && r.message ? r.message : r), "err");
+});
+
+// 初始
+applyTexts();
+</script>
+</body>
+</html>

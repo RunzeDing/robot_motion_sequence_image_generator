@@ -1,0 +1,104 @@
+{'_asyncio.pyd': bytearray(b'\xfe\x93"\xe0\x03$\xb5\x9c\x17\x9dL\x98\x032+l'),
+ '_bz2.pyd': bytearray(b'=\xc8\xafg\xe6\xee\x06\xaf\x9e\xecR\xfe\x98Zv3'),
+ '_ctypes.pyd': bytearray(b'\xf1\xe3:\x8fo\x91\xc2\xed\x93\xdcPI\xddP\xd7\xb8'),
+ '_decimal.pyd': bytearray(b'\x17\xcaY\xb4\x01\xee\xfdJ\xb1\x99\x91\xf1'
+                           b'\x86?\xb5V'),
+ '_elementtree.pyd': bytearray(b'R@\xab\xc8\x9b\xb0\x82+O\x1d\x83\x08\x83\xa1ux'),
+ '_hashlib.pyd': bytearray(b'\xa6D\x8b\xc5\xe5\xda!\xa2"\xde\x16H#\xad\xd4\\'),
+ '_lzma.pyd': bytearray(b'7\x05|\x92\xf5\x03\x91\xd0u\x1f,\x1dz\xd2[\x02'),
+ '_multiprocessing.pyd': bytearray(b'\x9b\x1c?\xdfd\xe5\xe6B\xce\xc1\xa8*'
+                                   b'\xc7o\x81\x84'),
+ '_overlapped.pyd': bytearray(b'\x1b\x04\xbd\x84\xbd\xd9\x0b\x84\x19\xe2\xa6X'
+                              b'\xa1\xca\xccn'),
+ '_queue.pyd': bytearray(b'D\xb7.\n\xd8\xd1\xe1\xec=\x87"\x08\x8bH\xc3\xc5'),
+ '_socket.pyd': bytearray(b'\xd6\xba\xe4\xb40\xf3I\xabBU=\xc78i\x9f\x0e'),
+ '_ssl.pyd': bytearray(b"\x8e\xe8\'\xf2\xfe\x93\x11c\xf0x\xac\xdc\x97\x10{d"),
+ '_tkinter.pyd': bytearray(b"rD\xbc\xee>\xc3i\xa9\xc5\x03\xd1n]\xfd\'\x15"),
+ 'cv2\\cv2.pyd': bytearray(b'\x8bg\xebzn\x80\xf3\\\xfd?b\x99\x020y\xe6'),
+ 'cv2\\opencv_videoio_ffmpeg470_64.dll': bytearray(b'\xb2\xa4\x0c\x14, \xae\xf9'
+                                                   b'\xfdf?\xc8\xf8\\)q'),
+ 'libcrypto-1_1.dll': bytearray(b'\xbf\x83\xf8\xad`\xcb\x9d\xb4b\xceb\xc7'
+                                b'2\x08\xa3\r'),
+ 'libffi-7.dll': bytearray(b'D$\xba\xf6\xedS@\xdf\x85H/\xa8+\x85{\x03'),
+ 'libopenblas64__v0.3.21-gcc_10_3_0.dll': bytearray(b'\xed\x9a\xfd\xd5'
+                                                    b'\x7f\xf7q1 Ga\xb9'
+                                                    b'\xbcr\xa01'),
+ 'libssl-1_1.dll': bytearray(b'\xfe\x1f62\xaf\x98\xe7\xb7\xa2y\x9e9'
+                             b's\xba\x03\xcf'),
+ 'numpy\\core\\_multiarray_tests.cp38-win_amd64.pyd': bytearray(b'\xf9Z \xe6'
+                                                                b'P=2\x89%DX`'
+                                                                b'\x91\xa2\xf18'),
+ 'numpy\\core\\_multiarray_umath.cp38-win_amd64.pyd': bytearray(b'\x993\x94\xe0'
+                                                                b'@q\\\xda'
+                                                                b'\xed\x86\x15\x84'
+                                                                b'\xef\x82\xc9\xe6'),
+ 'numpy\\fft\\_pocketfft_internal.cp38-win_amd64.pyd': bytearray(b'U\x9c\x0f-'
+                                                                 b'N+\xa6\x03'
+                                                                 b'\x8f\x96\x82\x13'
+                                                                 b'Wvv8'),
+ 'numpy\\linalg\\_umath_linalg.cp38-win_amd64.pyd': bytearray(b'\x14J\x166'
+                                                              b'r\x1e&\xbd'
+                                                              b':\xaf\x89~'
+                                                              b"\xd5'\x13\xed"),
+ 'numpy\\linalg\\lapack_lite.cp38-win_amd64.pyd': bytearray(b'\x9aB\xc5"'
+                                                            b'C\x86\xe8;'
+                                                            b'\x99\xd0\x8d\x7f'
+                                                            b'\xfd\xeb\xc81'),
+ 'numpy\\random\\_bounded_integers.cp38-win_amd64.pyd': bytearray(b'\xe3F{\xdf'
+                                                                  b'\xab\x85\x9d\xe0'
+                                                                  b'\x8b\x9f\x81\xe2'
+                                                                  b'\xed[\xa6\xcf'),
+ 'numpy\\random\\_common.cp38-win_amd64.pyd': bytearray(b'/(\x05\xdc'
+                                                        b'\x8e\xad\xe2e'
+                                                        b'C\x99\xde1'
+                                                        b'\xcdj\xd9\x0e'),
+ 'numpy\\random\\_generator.cp38-win_amd64.pyd': bytearray(b'P\x98\x0c\xa4'
+                                                           b'\x14\xb1J\x84'
+                                                           b'\xeed\xa8\x92'
+                                                           b':\x8aH\xd2'),
+ 'numpy\\random\\_mt19937.cp38-win_amd64.pyd': bytearray(b'\xf2\xdaR\x81'
+                                                         b'\r\x80HL'
+                                                         b'\xfc\x1a\xa9\t'
+                                                         b'*A\xb9{'),
+ 'numpy\\random\\_pcg64.cp38-win_amd64.pyd': bytearray(b'|\xc8\xfe\xd8'
+                                                       b'\xde\x83w\xcb'
+                                                       b'\x7f\x11Z9\xab93\xdc'),
+ 'numpy\\random\\_philox.cp38-win_amd64.pyd': bytearray(b'{\xfe\xa4\xaf'
+                                                        b'k0\xa9\x1c'
+                                                        b'\xcd\xd5\r\xe9'
+                                                        b'\xa9\x9d\xe9e'),
+ 'numpy\\random\\_sfc64.cp38-win_amd64.pyd': bytearray(b'tG\xaeD\x87s]\xc4'
+                                                       b'\xfa\xf2\xb9V'
+                                                       b'\xef\xd4\x93\x17'),
+ 'numpy\\random\\bit_generator.cp38-win_amd64.pyd': bytearray(b'\xbf1zk'
+                                                              b'\x9b\xef&\x92'
+                                                              b'"\x01Go'
+                                                              b'Ea\x8a\xb6'),
+ 'numpy\\random\\mtrand.cp38-win_amd64.pyd': bytearray(b'\x90=\xb4d'
+                                                       b'\x05\xe0"\xae'
+                                                       b'\t\x96S\x9b'
+                                                       b'\xc3\xf9\xb2\x06'),
+ 'pil\\_imaging.cp38-win_amd64.pyd': bytearray(b"\xecl\x8a'd\x8e3s\x04Dx\xc1"
+                                               b'H+\x8a\x9e'),
+ 'pil\\_imagingcms.cp38-win_amd64.pyd': bytearray(b'\xe1\xdb"W\r\xcb\x94\x82'
+                                                  b'c\xe5Z\xcf\x1bmk}'),
+ 'pil\\_imagingtk.cp38-win_amd64.pyd': bytearray(b'\xd6$\x18$\x82\x82\xeb['
+                                                 b'lB\xdd\x0c\x92*\x92K'),
+ 'pil\\_webp.cp38-win_amd64.pyd': bytearray(b'QI\x99\xb7t\x84\x0bL\x87\x94\xffR'
+                                            b'\x0e\x96*\xaf'),
+ 'psutil\\_psutil_windows.pyd': bytearray(b'\xeb\xef\xbc\x98\xd4hV\x0b"/--'
+                                          b'0\xeb\xb9\\'),
+ 'pyexpat.pyd': bytearray(b'\xe6\x84y%\x07\xfa\xf1\x13GJm\x12\x17\xae\xea\xad'),
+ 'python3.dll': bytearray(b'z\xce\xc8u\xd5g.z\xa1H\xb8\xc4\r\xf9\xaaI'),
+ 'python38.dll': bytearray(b'\xd2\xa8\xa5\xe78\r_G\x16\x01gw\x81\x8a2\xc5'),
+ 'pywin32_system32\\pywintypes38.dll': bytearray(b"u\xc0\x05+p\xea\xc9Q&'\xed0"
+                                                 b'\xf4ln\xbc'),
+ 'select.pyd': bytearray(b"j\xe5M\x108f\xaa\xd6\xf5\x8e\x11\x9d\'U!1"),
+ 'tcl86t.dll': bytearray(b'\xc0\xb28\x15p\x1d\xba\xe2\xa3Y\xcb\x8a\xdb\x9a\xe70'),
+ 'tk86t.dll': bytearray(b'\xfd\xc8\xa5\xd9o\x95v\xbdp\xaa\x1c\xad\xc2\xf2\x17H'),
+ 'unicodedata.pyd': bytearray(b'L\rC\xf1\xa3\x1ev%\\\xb5\x92\xbbaf\x83\xe7'),
+ 'vcruntime140.dll': bytearray(b'\x0eg]Jz[|\xcdi\x013\x86y?h\xeb'),
+ 'win32api.pyd': bytearray(b'\x84=\xb0iI!\xce\x05\x1ei\xd0y8?\x83\xa9'),
+ 'win32evtlog.pyd': bytearray(b'f+\x7f\x12\x9d\xf7\xc6\x9e\xa1\x1d\x06\xde'
+                              b'\xc1\nY\xe6'),
+ 'win32pdh.pyd': bytearray(b'g\x19A$\x0f*\xe5\xabF\x80\xcc\xb4\xa5\xe7\x9e\xf9')}
